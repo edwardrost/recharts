@@ -64,38 +64,41 @@ const data: DataPoint[] = [
   },
 ];
 
+
+// Calculate min, max, mean and standard deviation for the first curve (pv)
 const dataPV: number[] = data.map((i) => i.pv);
 const minPV: number = min(dataPV);
 const maxPV: number = max(dataPV);
 const meanPV: number = mean(dataPV);
 const standardDeviationPV: number = standardDeviation(dataPV);
-console.log('meanPV: ',meanPV);
-console.log('standardDeviationPV: ',standardDeviationPV);
 
+// Calculate min, max, mean and standard deviation for the second curve (uv)
 const dataUV: number[] = data.map((i) => i.uv);
 const minUV: number = min(dataUV);
 const maxUV: number = max(dataUV);
 const meanUV: number = mean(dataUV);
 const standardDeviationUV: number = standardDeviation(dataUV);
-console.log('meanUV: ',meanUV);
-console.log('standardDeviationUV: ',standardDeviationUV);
 
+// Define the interface for customized dot rendering 
 interface CustomizedDotProps {
   cx: number;
   cy: number;
   value: number[];
 }
-
+// Define the function to render customized dots for the first curve (pv)
 const renderDotPV = (props: CustomizedDotProps) => {
   const { cx, cy, value } = props;
+  // Define color of the dot based on z-score for the first curve (pv)
   const stroke: string = zScore(value[1], meanPV, standardDeviationPV) > 1 ? 'red' : '#8884d8';
-  return <Dot cx={cx} cy={cy} r={3} fill={stroke} stroke={stroke}/>;
+  return <Dot key={"pv" + cx} cx={cx} cy={cy} r={3} fill={stroke} stroke={stroke}/>;
 };
 
+// Define the function to render customized dots for the second curve (uv)
 const renderDotUV = (props: CustomizedDotProps) => {
   const { cx, cy, value } = props;
+  // Define color of the dot based on z-score for the second curve (uv)
   const stroke: string = zScore(value[1], meanUV, standardDeviationUV) > 1 ? 'red' : '#82ca9d';
-  return <Dot cx={cx} cy={cy} r={3} fill={stroke} stroke={stroke}  />;
+  return <Dot key={"uv" + cx} cx={cx} cy={cy} r={3} fill={stroke} stroke={stroke}  />;
 };
 
 export default function App() {
@@ -106,14 +109,14 @@ export default function App() {
         <XAxis dataKey="name" padding={{ left: 30, right: 30 }} />
         <YAxis />
         <Tooltip />
-        <Legend />        
+        <Legend />
         <defs>
           <linearGradient id="splitColorPV" x1="0" y1="1" x2="0" y2="0">
             <stop offset={(meanPV+standardDeviationPV-minPV)/(maxPV-minPV)} stopColor="#8884d8" stopOpacity={1} />
             <stop offset={(meanPV+standardDeviationPV-minPV)/(maxPV-minPV)} stopColor="red" stopOpacity={1} />
           </linearGradient>
         </defs>
-        <Area
+        <Area          
           type="monotone"
           dataKey="pv"
           stroke="url(#splitColorPV)"
@@ -130,6 +133,7 @@ export default function App() {
           </linearGradient>
         </defs>
         <Area
+          key="uv"
           type="monotone"
           dataKey="uv"
           stroke="url(#splitColorUV)"
@@ -138,8 +142,8 @@ export default function App() {
           baseValue={meanUV+standardDeviationUV}
           dot={renderDotUV}
           activeDot={false}
-        />           
-      </AreaChart>      
+        />
+      </AreaChart>
     </ResponsiveContainer>
   );
 }
